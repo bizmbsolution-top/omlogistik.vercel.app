@@ -7,7 +7,7 @@ export default function TestWA() {
     const phone = "6285218129978";
 
     // 👉 LINK TEST DULU (BIAR PASTI MUNCUL)
-    const link = "https://my-logistik-app.vercel.app/driver";
+    const link = "https://omlogistik.vercel.app/driver";
 
     const message = encodeURIComponent(
       "🚛 TEST WA\n\nKlik link ini:\n" + link
