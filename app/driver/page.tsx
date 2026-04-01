@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function DriverPage() {
+function DriverContent() {
   const searchParams = useSearchParams();
   const jo = searchParams.get("jo");
 
@@ -11,7 +11,7 @@ export default function DriverPage() {
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setStatus("GPS tidak support di HP ini");
+      setStatus("GPS tidak support");
       return;
     }
 
@@ -21,12 +21,9 @@ export default function DriverPage() {
         const lng = pos.coords.longitude;
 
         setStatus(`📍 Lokasi: ${lat}, ${lng}`);
-
-        console.log("Lokasi:", lat, lng);
       },
-      (err) => {
+      () => {
         setStatus("❌ GPS tidak diizinkan");
-        console.error(err);
       },
       {
         enableHighAccuracy: true,
@@ -41,8 +38,14 @@ export default function DriverPage() {
       <p><b>JO:</b> {jo}</p>
 
       <h3>{status}</h3>
-
-      <p>Aktifkan GPS ya 📍</p>
     </div>
+  );
+}
+
+export default function DriverPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DriverContent />
+    </Suspense>
   );
 }
