@@ -1,17 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../../lib/supabaseClient";
+import { supabase } from "../../../lib/supabaseClient";
 import { useParams } from "next/navigation";
 
-export default function AssignJOPage() {
+export default function JobOrderDetail() {
   const params = useParams();
-  const id = params.id;
+  const id = params.id as string;
 
   const [jo, setJo] = useState<any>(null);
   const [fleets, setFleets] = useState<any[]>([]);
   const [drivers, setDrivers] = useState<any[]>([]);
-  const [profil, setProfil] = useState<any>(null);
 
   const [selectedFleet, setSelectedFleet] = useState("");
   const [selectedDriver, setSelectedDriver] = useState("");
@@ -21,20 +20,6 @@ export default function AssignJOPage() {
   // LOAD DATA
   // =========================
   const getData = async () => {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    // ambil profil (tenant)
-    const { data: profilData } = await supabase
-      .from("profil_pengguna")
-      .select("*")
-      .eq("id", user?.id)
-      .single();
-
-    setProfil(profilData);
-
-    // ambil JO
     const { data: joData } = await supabase
       .from("job_orders")
       .select("*")
@@ -43,17 +28,13 @@ export default function AssignJOPage() {
 
     setJo(joData);
 
-    // ambil fleet
     const { data: fleetData } = await supabase
       .from("data_armada")
-      .select("*")
-      .eq("perusahaan_id", profilData.perusahaan_id);
+      .select("*");
 
-    // ambil driver
     const { data: driverData } = await supabase
       .from("data_driver")
-      .select("*")
-      .eq("perusahaan_id", profilData.perusahaan_id);
+      .select("*");
 
     setFleets(fleetData || []);
     setDrivers(driverData || []);
@@ -83,7 +64,7 @@ export default function AssignJOPage() {
   };
 
   // =========================
-  // ASSIGN + KIRIM WA
+  // 🚀 DISPATCH + WA
   // =========================
   const handleDispatch = async () => {
     if (!selectedFleet || !selectedDriver || !selectedPhone) {
@@ -93,29 +74,31 @@ export default function AssignJOPage() {
 
     const phone = formatPhone(selectedPhone);
 
-    // 🔥 GANTI IP SESUAI LAPTOP KAMU
-    const driverLink = `http://192.168.1.40:3000/driver?jo=${b7656270-d4e0-4ac4-a29f-7e5ab4face79}`;
+    // ✅ DOMAIN VERCEL (FIX)
+    const baseUrl = "https://omlogistik.vercel.app";
 
-    // update database
+    const driverLink = `${baseUrl}/driver?jo=${id}`;
+
+    // update DB
     await supabase
       .from("job_orders")
       .update({
         nopol_armada: selectedFleet,
         nama_driver: selectedDriver,
         hp_driver: phone,
-        driver_link: driverLink,
         status_jo: "DISPATCHED",
       })
       .eq("id", id);
 
-    // pesan WA
     const message = encodeURIComponent(
-      `🚛 *Tugas Baru*\n\nAnda mendapat Job Order.\n\nKlik link ini:\n${driverLink}`
+      "🚛 Tugas Baru\n\n" +
+      "No JO: " + jo?.nomor_jo + "\n\n" +
+      "Klik link ini:\n" +
+      driverLink
     );
 
     const waUrl = `https://wa.me/${6285218129978}?text=${message}`;
 
-    // buka WA
     window.open(waUrl, "_blank");
   };
 
@@ -125,18 +108,18 @@ export default function AssignJOPage() {
     <div style={{ padding: 20 }}>
       <h1>🚛 Dispatch Job Order</h1>
 
-      <p><b>No JO:</b> {jo.nomor_jo}</p>
-      <p><b>Status:</b> {jo.status_jo}</p>
+      <p><b>No JO:</b> {jo?.nomor_jo}</p>
+      <p><b>Status:</b> {jo?.status_jo}</p>
 
-      <div style={containerStyle}>
+      <div style={{ marginTop: 20, maxWidth: 400 }}>
 
         {/* FLEET */}
-        <div>
+        <div style={{ marginBottom: 15 }}>
           <label>Pilih Fleet</label>
           <select
             value={selectedFleet}
             onChange={(e) => setSelectedFleet(e.target.value)}
-            style={inputStyle}
+            style={{ width: "100%", padding: 10 }}
           >
             <option value="">-- Pilih Fleet --</option>
             {fleets.map((f) => (
@@ -148,7 +131,7 @@ export default function AssignJOPage() {
         </div>
 
         {/* DRIVER */}
-        <div>
+        <div style={{ marginBottom: 15 }}>
           <label>Pilih Driver</label>
           <select
             onChange={(e) => {
@@ -158,7 +141,7 @@ export default function AssignJOPage() {
               setSelectedDriver(selected?.nama_driver || "");
               setSelectedPhone(selected?.no_hp || "");
             }}
-            style={inputStyle}
+            style={{ width: "100%", padding: 10 }}
           >
             <option value="">-- Pilih Driver --</option>
             {drivers.map((d) => (
@@ -170,41 +153,28 @@ export default function AssignJOPage() {
         </div>
 
         {/* HP */}
-        <div>
+        <div style={{ marginBottom: 15 }}>
           <label>No HP Driver</label>
-          <input value={selectedPhone} disabled style={inputStyle} />
+          <input
+            value={selectedPhone}
+            disabled
+            style={{ width: "100%", padding: 10 }}
+          />
         </div>
 
         {/* BUTTON */}
-        <button onClick={handleDispatch} style={buttonStyle}>
+        <button
+          onClick={handleDispatch}
+          style={{
+            background: "green",
+            color: "white",
+            padding: 12,
+            width: "100%",
+          }}
+        >
           🚀 Assign + Kirim WhatsApp
         </button>
       </div>
     </div>
   );
 }
-
-// STYLE
-const containerStyle = {
-  marginTop: 20,
-  maxWidth: 400,
-  display: "flex",
-  flexDirection: "column" as const,
-  gap: 15,
-};
-
-const inputStyle = {
-  width: "100%",
-  padding: "10px",
-  marginTop: "5px",
-  border: "1px solid #ccc",
-  borderRadius: "5px",
-};
-
-const buttonStyle = {
-  background: "green",
-  color: "white",
-  padding: "12px",
-  borderRadius: 5,
-  fontWeight: "bold",
-};
