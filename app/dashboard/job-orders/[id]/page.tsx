@@ -45,7 +45,7 @@ export default function JobOrderDetail() {
   }, [id]);
 
   // =========================
-  // FORMAT NOMOR HP
+  // FORMAT NOMOR
   // =========================
   const formatPhone = (phone: string) => {
     if (!phone) return "";
@@ -74,12 +74,9 @@ export default function JobOrderDetail() {
 
     const phone = formatPhone(selectedPhone);
 
-    // ✅ DOMAIN VERCEL (FIX)
     const baseUrl = "https://omlogistik.vercel.app";
-
     const driverLink = `${baseUrl}/driver?jo=${id}`;
 
-    // update DB
     await supabase
       .from("job_orders")
       .update({
@@ -97,7 +94,7 @@ export default function JobOrderDetail() {
       driverLink
     );
 
-    const waUrl = `https://wa.me/${6285218129978}?text=${message}`;
+    const waUrl = `https://wa.me/${phone}?text=${message}`;
 
     window.open(waUrl, "_blank");
   };
@@ -113,7 +110,6 @@ export default function JobOrderDetail() {
 
       <div style={{ marginTop: 20, maxWidth: 400 }}>
 
-        {/* FLEET */}
         <div style={{ marginBottom: 15 }}>
           <label>Pilih Fleet</label>
           <select
@@ -130,7 +126,6 @@ export default function JobOrderDetail() {
           </select>
         </div>
 
-        {/* DRIVER */}
         <div style={{ marginBottom: 15 }}>
           <label>Pilih Driver</label>
           <select
@@ -152,7 +147,6 @@ export default function JobOrderDetail() {
           </select>
         </div>
 
-        {/* HP */}
         <div style={{ marginBottom: 15 }}>
           <label>No HP Driver</label>
           <input
@@ -162,7 +156,6 @@ export default function JobOrderDetail() {
           />
         </div>
 
-        {/* BUTTON */}
         <button
           onClick={handleDispatch}
           style={{
