@@ -3,6 +3,9 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
+// =========================
+// COMPONENT ISI
+// =========================
 function DriverContent() {
   const searchParams = useSearchParams();
   const jo = searchParams.get("jo");
@@ -11,7 +14,7 @@ function DriverContent() {
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setStatus("GPS tidak support");
+      setStatus("❌ GPS tidak support di HP ini");
       return;
     }
 
@@ -21,9 +24,12 @@ function DriverContent() {
         const lng = pos.coords.longitude;
 
         setStatus(`📍 Lokasi: ${lat}, ${lng}`);
+
+        console.log("GPS:", lat, lng);
       },
-      () => {
+      (err) => {
         setStatus("❌ GPS tidak diizinkan");
+        console.error(err);
       },
       {
         enableHighAccuracy: true,
@@ -35,16 +41,21 @@ function DriverContent() {
     <div style={{ padding: 20 }}>
       <h1>🚛 DRIVER TRACKING</h1>
 
-      <p><b>JO:</b> {jo}</p>
+      <p><b>JO ID:</b> {jo}</p>
 
       <h3>{status}</h3>
+
+      <p>Aktifkan GPS ya 📍</p>
     </div>
   );
 }
 
+// =========================
+// WRAPPER WAJIB (SUSPENSE)
+// =========================
 export default function DriverPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>Loading driver...</div>}>
       <DriverContent />
     </Suspense>
   );
