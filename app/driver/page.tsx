@@ -24,7 +24,6 @@ function DriverContent() {
         const lng = pos.coords.longitude;
 
         setStatus(`📍 Lokasi: ${lat}, ${lng}`);
-
         console.log("GPS:", lat, lng);
       },
       (err) => {
@@ -51,7 +50,7 @@ function DriverContent() {
 }
 
 // =========================
-// WRAPPER WAJIB (SUSPENSE)
+// WRAPPER SUSPENSE
 // =========================
 export default function DriverPage() {
   return (
